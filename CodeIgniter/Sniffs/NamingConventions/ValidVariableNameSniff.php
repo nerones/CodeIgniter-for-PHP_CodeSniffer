@@ -1,4 +1,8 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\AbstractVariableSniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff.
  *
@@ -11,11 +15,6 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-
-if (class_exists('PHP_CodeSniffer_Standards_AbstractVariableSniff', true) === false) {
-    $error = 'Class PHP_CodeSniffer_Standards_AbstractVariableSniff not found';
-    throw new PHP_CodeSniffer_Exception($error);
-}
 
 /**
  * CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff.
@@ -41,20 +40,20 @@ if (class_exists('PHP_CodeSniffer_Standards_AbstractVariableSniff', true) === fa
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_CodeSniffer_Standards_AbstractVariableSniff
+class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends AbstractVariableSniff
 {
 
 
     /**
      * Processes class member variables.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
+     * @param File $phpcsFile The file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    protected function processMemberVar(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    protected function processMemberVar(File $phpcsFile, $stackPtr)
     {
         // get variable name and properties
         $tokens = $phpcsFile->getTokens();
@@ -62,28 +61,22 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
         $varName = substr($varTk['content'], 1);
         $varProps = $phpcsFile->getMemberProperties($stackPtr);
         // check(s)
-        if ( ! $this->checkLowerCase($phpcsFile, $stackPtr, $varName) ) {
-            return;
-        }
-        if ( ! $this->checkVisibilityPrefix($phpcsFile, $stackPtr, $varName, $varProps)) {
-            return;
-        }
         if ( ! $this->checkLength($phpcsFile, $stackPtr, $varName)) {
             return;
         }
 
-    }//end processMemberVar()
+    }
 
 
     /**
      * Processes normal variables.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where this token was found.
+     * @param File $phpcsFile The file where this token was found.
      * @param int                  $stackPtr  The position where the token was found.
      *
      * @return void
      */
-    protected function processVariable(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    protected function processVariable(File $phpcsFile, $stackPtr)
     {
         // get variable name
         $tokens = $phpcsFile->getTokens();
@@ -93,26 +86,22 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
         if (0 === strcmp($varName, 'this')) {
             return;
         }
-        // check(s)
-        if ( ! $this->checkLowerCase($phpcsFile, $stackPtr, $varName)) {
-            return;
-        }
         if ( ! $this->checkLength($phpcsFile, $stackPtr, $varName)) {
             return;
         }
 
-    }//end processVariable()
+    }
 
 
     /**
      * Processes variables in double quoted strings.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where this token was found.
+     * @param File $phpcsFile The file where this token was found.
      * @param int                  $stackPtr  The position where the token was found.
      *
      * @return void
      */
-    protected function processVariableInString(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    protected function processVariableInString(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
         $stringTk = $tokens[$stackPtr];
@@ -124,9 +113,6 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
             preg_match('/^\$\{?([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)\}?/', substr($stringString, $varAt), $matches);
             $varName = $matches[1];
             // check(s)
-            if ( ! $this->checkLowerCase($phpcsFile, $stackPtr, $varName)) {
-                return;
-            }
             if ( ! $this->checkLength($phpcsFile, $stackPtr, $varName)) {
                 return;
             }
@@ -136,82 +122,6 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
 
     }//end processVariableInString()
 
-
-    /**
-     * Checks that the variable name is all in lower case, else it add an error
-     * to $phpcsFile. Returns true if variable name is all in lower case, false
-     * otherwise.
-     *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
-     * @param int                  $stackPtr  The position of the current token
-     *                                        in the stack passed in $tokens.
-     * @param string               $varName   The name of the variable to
-     *                                        procced without $, { nor }.
-     *
-     * @return bool true if variable name is all in lower case, false otherwise.
-     */
-    protected function checkLowerCase(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $varName)
-    {
-        $isInLowerCase = true;
-        if (0 !== strcmp($varName, strtolower($varName))) {
-            // get the expected variable name
-            $varNameWithUnderscores = preg_replace('/([A-Z])/', '_${1}', $varName);
-            $expectedVarName = strtolower(ltrim($varNameWithUnderscores, '_'));
-            // adapts the error message to the error case
-            if (strlen($varNameWithUnderscores) > strlen($varName)) {
-                $error = 'Variables should not use CamelCasing or start with a Capital.';
-            } else {
-                $error = 'Variables should be entirely lowercased.';
-            }
-            $error = $error . 'Please consider "' . $expectedVarName
-                . '" instead of "' . $varName . '".';
-            // adds the error and changes return value
-            $phpcsFile->addError($error, $stackPtr);
-            $isInLowerCase = false;
-        }
-        return $isInLowerCase;
-    }//end checkLowerCase()
-
-    /**
-     * Checks that an underscore is used at the beginning of a variable only if
-     * it is about a private variable. If it isn't a private variable, then it
-     * must not be prefixed with an underscore. Returns true if $varName is
-     * properly prefixed according to the variable visibility provided in
-     * $varProps, false otherwise.
-     * 
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
-     * @param int                  $stackPtr  The position of the current token
-     *                                        in the stack passed in $tokens.
-     * @param string               $varName   The name of the variable to
-     *                                        procced without $, { nor }.
-     * @param array                $varProps  Member variable properties like
-     *                                        its visibility.
-     *
-     * @return bool true if variable name is prefixed with an underscore only
-     * when it is about a private variable, false otherwise.
-     */
-    protected function checkVisibilityPrefix(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $varName, $varProps)
-    {
-        $isVisibilityPrefixRight = true;
-        $scope = $varProps['scope'];
-        // If it's a private variable, it must have an underscore on the front.
-        if ($scope === 'private' && $varName{0} !== '_') {
-            $error = "Private variable name \"$varName\" must be prefixed with an underscore";
-            $phpcsFile->addError($error, $stackPtr);
-            $isVisibilityPrefixRight = false;
-        } else if ($scope !== 'private' && $varName{0} === '_') {
-            // If it's not a private variable,
-            // then it must not start with an underscore.
-            if (isset ($scopeSpecified) && true === $scopeSpecified) {
-                $error = "Public variable name \"$varName\" must not be prefixed with an underscore";
-            } else {
-                $error = ucfirst($scope) . " variable name \"$varName\" must not be prefixed with an underscore";
-            }
-            $phpcsFile->addError($error, $stackPtr);
-            $isVisibilityPrefixRight = false;
-        }
-        return $isVisibilityPrefixRight;
-    }//end checkVisibilityPrefix()
 
     /**
      * Checks that variable name length is not too short. Returns true, if it
@@ -224,7 +134,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * The list of allowed short names is defined in the function.
      * It is case-sensitive. It contains only 'ci' now.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      * @param string               $varName   The name of the variable to
@@ -234,7 +144,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * length and it isn't in the list of allowed short names nor declared in a
      * for loop (in which it would be nested), otherwise true.
      */
-    protected function checkLength(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $varName)
+    protected function checkLength(File $phpcsFile, $stackPtr, $varName)
     {
         $minLength = 3;
         $allowedShortName = array('ci');
@@ -260,7 +170,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
                 )
                 . ', non-word variables like "' . $varName
                 . '" should only be used as iterators in for() loops.';
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidVariableNameSniff');
             $isLengthRight = false;
         }
         return $isLengthRight;
@@ -270,7 +180,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * Returns the position of closest previous T_FOR, if token associated with
      * $stackPtr in $phpcsFile is in a for loop, otherwise false.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      * @param string               $varName   The name of the variable to
@@ -279,7 +189,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * @return int|bool Position of T_FOR if token associated with $stackPtr in
      *                  $phpcsFile is in the head of a for loop, otherwise false.
      */
-    private static function _isInForLoop(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $varName)
+    private static function _isInForLoop(File $phpcsFile, $stackPtr, $varName)
     {
         $keepLookingFromPtr = $stackPtr;
         while (false !== $keepLookingFromPtr) {
@@ -307,14 +217,14 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * The head is the code placed between parenthesis next to the key word
      * 'for' : for (<loop_head>) {<loop_body>}.
      * 
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      * 
      * @return int|bool Position of T_FOR if token associated with $stackPtr in
      *                  $phpcsFile is in the head of a for loop, otherwise false.
      */
-    private static function _isInForLoopHead(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    private static function _isInForLoopHead(File $phpcsFile, $stackPtr)
     {
         $isInForLoop = false;
         $tokens = $phpcsFile->getTokens();
@@ -349,14 +259,14 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * declaration, enclosed with curly brackets usually.
      * 'for' : for (<loop_head>) {<loop_body>}.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return int|bool Position of T_FOR if token associated with $stackPtr in
      *                  $phpcsFile is in the body of a for loop, otherwise false.
      */
-    private static function _isInForLoopBody(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    private static function _isInForLoopBody(File $phpcsFile, $stackPtr)
     {
         $isInForLoop = false;
         $tokens = $phpcsFile->getTokens();
@@ -439,7 +349,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * Returns true if a variable declared in the head of the for loop pointed
      * by $forPtr in file $phpcsFile has the name $varName.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $forPtr    The position of the 'for' token
      *                                        in the stack passed in $tokens.
      * @param string               $varName   The name of the variable to
@@ -448,7 +358,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * @return int|bool true if a variable declared in the head of the for loop
      * pointed by $forPtr in file $phpcsFile has the name $varName.
      */
-    private static function _isDeclaredInForLoop(PHP_CodeSniffer_File $phpcsFile, $forPtr, $varName)
+    private static function _isDeclaredInForLoop(File $phpcsFile, $forPtr, $varName)
     {
         $isDeclaredInFor = false;
         $tokens = $phpcsFile->getTokens();
@@ -475,13 +385,13 @@ class CodeIgniter_Sniffs_NamingConventions_ValidVariableNameSniff extends PHP_Co
      * T_VARIABLE. An exception is raised, if $forPtr doesn't point a token with
      * code T_FOR.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $forPtr    The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return array List of pointers to variables declared in for loop $forPtr.
      */
-    private static function _getVarDeclaredInFor(PHP_CodeSniffer_File $phpcsFile, $forPtr)
+    private static function _getVarDeclaredInFor(File $phpcsFile, $forPtr)
     {
         $tokens = $phpcsFile->getTokens();
         $forTk = $tokens[$forPtr];

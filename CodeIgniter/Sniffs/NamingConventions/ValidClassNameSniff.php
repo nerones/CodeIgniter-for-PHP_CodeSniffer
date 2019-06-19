@@ -1,4 +1,6 @@
 <?php
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 /**
  * CodeIgniter_Sniffs_NamingConventions_ValidClassNameSniff.
  *
@@ -29,7 +31,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_NamingConventions_ValidClassNameSniff implements PHP_CodeSniffer_Sniff
+class CodeIgniter_Sniffs_NamingConventions_ValidClassNameSniff implements Sniff
 {
 
 
@@ -50,13 +52,13 @@ class CodeIgniter_Sniffs_NamingConventions_ValidClassNameSniff implements PHP_Co
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being processed.
+     * @param File $phpcsFile The current file being processed.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         // get the class name
         $className = trim($phpcsFile->getDeclarationName($stackPtr));
@@ -69,7 +71,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidClassNameSniff implements PHP_Co
         // and the expected class name are identical
         if (0 !== strcmp($className, $expectedClassName)) {
             $error =  'Class names should always have their first letter uppercase. Multiple words should be separated with an underscore, and not CamelCased. Please consider ' . $expectedClassName . ' instead of ' . $className . '.';
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidClassNameSniff');
         }
     }//end process()
 

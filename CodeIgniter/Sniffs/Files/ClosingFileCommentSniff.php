@@ -1,4 +1,10 @@
 <?php
+
+namespace CodeIgniter\Sniffs\Files;
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_Files_ClosingFileCommentSniff.
  *
@@ -11,11 +17,6 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-
-if (class_exists('CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff', true) === false) {
-    $error = 'Class CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff not found';
-    throw new PHP_CodeSniffer_Exception($error);
-}
 
 /**
  * CodeIgniter_Sniffs_Files_ClosingFileCommentSniff.
@@ -36,7 +37,7 @@ if (class_exists('CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff', true) =
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Files_ClosingFileCommentSniff extends CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff
+class CodeIgniter_Sniffs_Files_ClosingFileCommentSniff extends AbstractClosingCommentSniff
 {
 
     /**
@@ -56,13 +57,13 @@ class CodeIgniter_Sniffs_Files_ClosingFileCommentSniff extends CodeIgniter_Sniff
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         // We are only interested if this is the first open tag.
         if ($stackPtr !== 0) {
@@ -101,7 +102,7 @@ class CodeIgniter_Sniffs_Files_ClosingFileCommentSniff extends CodeIgniter_Sniff
 
         if ( ! $hasClosingFileComment) {
             $error = 'No comment block marks the end of file instead of the closing PHP tag. Please add a comment block containing only "' . $commentTemplate . '".';
-            $phpcsFile->addError($error, $currentToken);
+            $phpcsFile->addError($error, $currentToken, 'ClosingFileCommentSniff');
         }
     }//end process()
 }//end class

@@ -1,4 +1,6 @@
 <?php
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 /**
  * CodeIgniter_Sniffs_Commenting_InlineCommentSniff.
  *
@@ -25,7 +27,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffer_Sniff
+class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements Sniff
 {
     /**
      * @var int Limit defining long comments.
@@ -48,13 +50,13 @@ class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffe
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
 
@@ -78,14 +80,14 @@ class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffe
      * Add error to $phpcsFile, if comment pointed by $stackPtr doesn't start
      * with '//'.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        that has to be a comment.
      * 
      * @return bool TRUE if the content of the token pointed by $stackPtr starts
      *              with //, FALSE if an error was added to $phpcsFile.
      */
-    private function _checkCommentStyle(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    private function _checkCommentStyle(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
         if ($tokens[$stackPtr]['content']{0} === '#') {
@@ -110,12 +112,12 @@ class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffe
     /**
      * Gather into an array all comment lines to which $stackPtr belongs.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  Pointer to the first comment line.
      * 
      * @return type array Pointers to tokens making up the comment block.
      */
-    private function _getCommentBlock(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    private function _getCommentBlock(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
         $commentLines = array($stackPtr);
@@ -139,13 +141,13 @@ class CodeIgniter_Sniffs_Commenting_InlineCommentSniff implements PHP_CodeSniffe
     /**
      * Add errors to $phpcsFile, if $commentLines isn't enclosed with blank lines.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile    The current file being scanned.
+     * @param File $phpcsFile    The current file being scanned.
      * @param array                $commentLines Lines of the comment block being checked.
      * 
      * @return bool TRUE if $commentLines is enclosed with at least a blank line
      * before and after, FALSE otherwise.
      */
-    private function _checkBlankLinesAroundLongComment(PHP_CodeSniffer_File $phpcsFile, array $commentLines)
+    private function _checkBlankLinesAroundLongComment(File $phpcsFile, array $commentLines)
     {
         $hasBlankLinesAround = TRUE;
         $tokens = $phpcsFile->getTokens();

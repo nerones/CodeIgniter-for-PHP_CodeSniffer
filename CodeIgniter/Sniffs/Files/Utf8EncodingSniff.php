@@ -1,4 +1,8 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_Files_Utf8EncodingSniff.
  *
@@ -24,7 +28,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Files_Utf8EncodingSniff implements PHP_CodeSniffer_Sniff
+class CodeIgniter_Sniffs_Files_Utf8EncodingSniff implements Sniff
 {
 
     /**
@@ -44,13 +48,13 @@ class CodeIgniter_Sniffs_Files_Utf8EncodingSniff implements PHP_CodeSniffer_Snif
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         // We are only interested if this is the first open tag.
         if ($stackPtr !== 0) {
@@ -62,18 +66,25 @@ class CodeIgniter_Sniffs_Files_Utf8EncodingSniff implements PHP_CodeSniffer_Snif
         $file_path = $phpcsFile->getFilename();
         $file_name = basename($file_path);
         $file_content = file_get_contents($file_path);
+	
         if (false === mb_check_encoding($file_content, 'UTF-8')) {
             $error = 'File "' . $file_name . '" should be saved with Unicode (UTF-8) encoding.';
-            $phpcsFile->addError($error, 0);
+            $phpcsFile->addError($error, 0, 'Utf8EncodingSniff::error');
         }
+
+	/** Really slow sniff
         if ( ! self::_checkUtf8W3c($file_content)) {
             $error = 'File "' . $file_name . '" should be saved with Unicode (UTF-8) encoding, but it did not successfully pass the W3C test.';
-            $phpcsFile->addError($error, 0);
-        }
+            $phpcsFile->addError($error, 0, 'Utf8EncodingSniff::w3c');
+	}
+	 */
+
+	/** kind of slow
         if ( ! self::_checkUtf8Rfc3629($file_content)) {
             $error = 'File "' . $file_name . '" should be saved with Unicode (UTF-8) encoding, but it did not meet RFC3629 requirements.';
-            $phpcsFile->addError($error, 0);
-        }
+            $phpcsFile->addError($error, 0, 'Utf8EncodingSniff::RFC3629');
+	}
+	 */
     }//end process()
 
 
@@ -208,9 +219,6 @@ class CodeIgniter_Sniffs_Files_Utf8EncodingSniff implements PHP_CodeSniffer_Snif
 		}
 		return $array;
 	}
-
-	
-
-}//end class
+}
 
 ?>

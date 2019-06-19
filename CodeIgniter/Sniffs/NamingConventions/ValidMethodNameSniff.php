@@ -1,4 +1,8 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\AbstractScopeSniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff.
  *
@@ -11,11 +15,6 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-
-if (class_exists('PHP_CodeSniffer_Standards_AbstractScopeSniff', true) === false) {
-    $error = 'Class PHP_CodeSniffer_Standards_AbstractScopeSniff not found';
-    throw new PHP_CodeSniffer_Exception($error);
-}
 
 /**
  * CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff.
@@ -38,7 +37,7 @@ if (class_exists('PHP_CodeSniffer_Standards_AbstractScopeSniff', true) === false
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_CodeSniffer_Standards_AbstractScopeSniff
+class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends AbstractScopeSniff
 {
     /**
      * A list of all PHP magic methods.
@@ -74,14 +73,14 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
     /**
      * Processes the tokens within the scope.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being processed.
+     * @param File $phpcsFile The file being processed.
      * @param int                  $stackPtr  The position where this token was
      *                                        found.
      * @param int                  $currScope The position of the current scope.
      *
      * @return void
      */
-    protected function processTokenWithinScope(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $currScope)
+    protected function processTokenWithinScope(File $phpcsFile, $stackPtr, $currScope)
     {
         $methodName = $phpcsFile->getDeclarationName($stackPtr);
         if ($methodName === null) {
@@ -96,7 +95,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
             $magicPart = substr($methodName, 2);
             if (in_array($magicPart, self::$magicMethods) === false) {
                  $error = "Method name \"$className::$methodName\" is invalid; only PHP magic methods should be prefixed with a double underscore";
-                 $phpcsFile->addError($error, $stackPtr);
+                 $phpcsFile->addError($error, $stackPtr, 'ValidMethodNameSniff');
             }
 
             return;
@@ -116,7 +115,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
             $uscrdMethodName = preg_replace('/([A-Z])/', '_${1}', $methodName);
             $expectedMethodName = strtolower($uscrdMethodName);
             $error = "Class methods should be entirely lowercased. Please consider \"$expectedMethodName\" instead of \"$methodName\".";
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidMethodNameSniff');
             return;
         }
 
@@ -127,7 +126,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
         // If it's a private method, it must have an underscore on the front.
         if ($scope === 'private' && $methodName{0} !== '_') {
             $error = "Private method name \"$className::$methodName\" must be prefixed with an underscore";
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidMethodNameSniff');
             return;
         }
 
@@ -138,7 +137,7 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
             } else {
                 $error = ucfirst($scope)." method name \"$className::$methodName\" must not be prefixed with an underscore";
             }
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidMethodNameSniff');
             return;
         }
 
@@ -148,14 +147,17 @@ class CodeIgniter_Sniffs_NamingConventions_ValidMethodNameSniff extends PHP_Code
         $warning_limit = 35;
         if (strlen($methodName) > $error_limit) {
             $error = "Overly long and verbose names are prohibited. Please find a name shorter than $error_limit chars.";
-            $phpcsFile->addError($error, $stackPtr);
+            $phpcsFile->addError($error, $stackPtr, 'ValidMethodNameSniff');
             return;
         } else if (strlen($methodName) > $warning_limit) {
             $warning = "Try to avoid overly long and verbose names in finding a name shorter than $warning_limit chars.";
-            $phpcsFile->addWarning($warning, $stackPtr);
+            $phpcsFile->addWarning($warning, $stackPtr, 'ValidMethodNameSniff');
         }
-    }//end processTokenWithinScope()
+    }
 
-}//end class
+    protected function processTokenOutsideScope(File $phpcsFile, $stackPtr)
+    {
+    }
+}
 
 ?>

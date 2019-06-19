@@ -1,4 +1,8 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_Strings_VariableUsageSniff.
  *
@@ -27,7 +31,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_Sniff
+class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements Sniff
 {
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -49,13 +53,13 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
         $string = $tokens[$stackPtr]['content'];
@@ -73,7 +77,7 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
     /**
      * Processes this test, when the token encountered is a double-quoted string.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile   The current file being scanned.
+     * @param File $phpcsFile   The current file being scanned.
      * @param int                  $stackPtr    The position of the current token
      *                                          in the stack passed in $tokens.
      * @param string               $dblQtString The double-quoted string content,
@@ -81,7 +85,7 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
      *
      * @return void
      */
-    protected function processDoubleQuotedString (PHP_CodeSniffer_File $phpcsFile, $stackPtr, $dblQtString)
+    protected function processDoubleQuotedString (File $phpcsFile, $stackPtr, $dblQtString)
     {
         $variableFound = FALSE;
         $strTokens = token_get_all('<?php '.$dblQtString);
@@ -96,19 +100,19 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
                         $this->_parseVariable($strTokens, $strPtr);
                     } catch (Exception $err) {
                         $error = 'There is no variable, object nor array between curly braces. Please use the escape char for $ or {.';
-                        $phpcsFile->addError($error, $stackPtr);
+                        $phpcsFile->addError($error, $stackPtr, 'VariableUsageSniff');
                     }
                     $variableFound = TRUE;
                     if ('}' !== $strTokens[$strPtr]) {
                         $error = 'There is no matching closing curly brace.';
-                        $phpcsFile->addError($error, $stackPtr);
+                        $phpcsFile->addError($error, $stackPtr, 'VariableUsageSniff');
                     }
                     // don't move forward, since it will be done in the main loop
                     // $strPtr++;
                 } else if (T_VARIABLE === $strToken[0]) {
                     $variableFound = TRUE;
                     $error = "Variable {$strToken[1]} in double-quoted strings should be enclosed with curly braces. Please consider {{$strToken[1]}}";
-                    $phpcsFile->addError($error, $stackPtr);
+                    $phpcsFile->addError($error, $stackPtr, 'VariableUsageSniff');
                 }
             }
             $strPtr++;
@@ -120,7 +124,7 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
     /**
      * Processes this test, when the token encountered is a single-quoted string.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile   The current file being scanned.
+     * @param File $phpcsFile   The current file being scanned.
      * @param int                  $stackPtr    The position of the current token
      *                                          in the stack passed in $tokens.
      * @param string               $sglQtString The single-quoted string content,
@@ -128,7 +132,7 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
      *
      * @return void
      */
-    protected function processSingleQuotedString (PHP_CodeSniffer_File $phpcsFile, $stackPtr, $sglQtString)
+    protected function processSingleQuotedString (File $phpcsFile, $stackPtr, $sglQtString)
     {
         $variableFound = FALSE;
         $strTokens = token_get_all('<?php '.$sglQtString);
@@ -138,7 +142,7 @@ class CodeIgniter_Sniffs_Strings_VariableUsageSniff implements PHP_CodeSniffer_S
             if (is_array($strToken)) {
                 if (T_VARIABLE === $strToken[0]) {
                     $error = "Variables like {$strToken[1]} should be in double-quoted strings only.";
-                    $phpcsFile->addError($error, $stackPtr);
+                    $phpcsFile->addError($error, $stackPtr, 'VariableUsageSniff');
                 }
             }
             $strPtr++;

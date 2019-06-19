@@ -1,4 +1,7 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\AbstractScopeSniff;
+use PHP_CodeSniffer\Files\File;
 /**
  * CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff.
  *
@@ -11,11 +14,6 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-
-if (class_exists('PHP_CodeSniffer_Standards_AbstractScopeSniff', true) === false) {
-    $error = 'Class PHP_CodeSniffer_Standards_AbstractScopeSniff not found';
-    throw new PHP_CodeSniffer_Exception($error);
-}
 
 /**
  * CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff.
@@ -32,7 +30,7 @@ if (class_exists('PHP_CodeSniffer_Standards_AbstractScopeSniff', true) === false
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_CodeSniffer_Standards_AbstractScopeSniff
+class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends AbstractScopeSniff
 {
 
 
@@ -54,7 +52,7 @@ class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_Code
     /**
      * Processes this test when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      * @param int                  $currScope A pointer to the start of the scope.
@@ -62,7 +60,7 @@ class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_Code
      * @return void
      */
     protected function processTokenWithinScope(
-        PHP_CodeSniffer_File $phpcsFile,
+        File $phpcsFile,
         $stackPtr,
         $currScope
     ) {
@@ -74,12 +72,12 @@ class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_Code
         if ($this->php5Constructors != '0') {
             if ($isPhp4Constructor) {
                 $error = "PHP4 style constructors are not allowed; use \"__construct\" instead";
-                $phpcsFile->addError($error, $stackPtr);
+                $phpcsFile->addError($error, $stackPtr, 'ConstructorNameSniff::PHP4');
             }
         } else {
             if ($isPhp5Constructor) {
                 $error = "PHP5 style constructors are not allowed; use \"$className\" instead";
-                $phpcsFile->addError($error, $stackPtr);
+                $phpcsFile->addError($error, $stackPtr, 'ConstructorNameSniff::PHP5');
             }
         }
         if ( ! $isPhp4Constructor && ! $isPhp5Constructor ) {
@@ -120,7 +118,7 @@ class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_Code
             if ($tokens[($doubleColonIndex + 1)]['code'] === T_STRING
                 && $tokens[($doubleColonIndex + 1)]['content'] === $wrongConstructor
             ) {
-                $phpcsFile->addError($error, ($doubleColonIndex + 1));
+                $phpcsFile->addError($error, ($doubleColonIndex + 1), 'ConstructorNameSniff');
             }
 
             $doubleColonIndex = $phpcsFile->findNext(
@@ -130,9 +128,12 @@ class CodeIgniter_Sniffs_NamingConventions_ConstructorNameSniff extends PHP_Code
             );
         }
 
-    }//end processTokenWithinScope()
+    }
 
+    protected function processTokenOutsideScope(File $phpcsFile, $stackPtr)
+    {
+    }
 
-}//end class
+}
 
 ?>

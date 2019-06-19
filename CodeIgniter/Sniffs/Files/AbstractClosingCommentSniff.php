@@ -1,4 +1,10 @@
 <?php
+
+namespace CodeIgniter\Sniffs\Files;
+
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 /**
  * CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff.
  *
@@ -26,7 +32,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff implements PHP_CodeSniffer_Sniff
+class AbstractClosingCommentSniff implements Sniff
 {
     /**
      * As an abstract class, this sniff is not associated to any token.
@@ -39,7 +45,7 @@ class CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff implements PHP_CodeSn
     /**
      * As an abstract class, this sniff is not dedicated to process a token.
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
       $error = __CLASS__.'::'.__METHOD__.' is abstract. Please develop this method in a child class.';
       throw new PHP_CodeSniffer_Exception($error);

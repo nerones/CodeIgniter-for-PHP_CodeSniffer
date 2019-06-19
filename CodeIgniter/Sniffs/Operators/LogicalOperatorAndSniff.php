@@ -1,4 +1,8 @@
 <?php
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
+
 /**
  * CodeIgniter_Sniffs_Operators_LogicalOperatorAndSniff.
  *
@@ -24,7 +28,7 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Operators_LogicalOperatorAndSniff implements PHP_CodeSniffer_Sniff
+class CodeIgniter_Sniffs_Operators_LogicalOperatorAndSniff implements Sniff
 {
 	/**
      * Returns an array of tokens this test wants to listen for: symbolic and literal operators and.
@@ -43,13 +47,13 @@ class CodeIgniter_Sniffs_Operators_LogicalOperatorAndSniff implements PHP_CodeSn
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
 
@@ -61,11 +65,11 @@ class CodeIgniter_Sniffs_Operators_LogicalOperatorAndSniff implements PHP_CodeSn
             $error_message = 'Logical operator should be in upper case;'
                 . ' use "' . strtoupper($operator_string)
                 . '" instead of "' . $operator_string . '"';
-            $phpcsFile->addError($error_message, $stackPtr);
+            $phpcsFile->addError($error_message, $stackPtr, 'LogicalOperatorAndSniff');
         }
 
         $warning_message = 'The symbolic form "&&" is preferred over the literal form "AND"';
-        $phpcsFile->addWarning($warning_message, $stackPtr);
+        $phpcsFile->addWarning($warning_message, $stackPtr, 'LogicalOperatorAndSniff');
 
     }//end process()
 

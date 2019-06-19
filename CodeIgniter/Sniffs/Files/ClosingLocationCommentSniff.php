@@ -1,4 +1,11 @@
 <?php
+
+namespace CodeIgniter\Sniffs\Files;
+
+use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Config;
+
 /**
  * CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff.
  *
@@ -11,11 +18,6 @@
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-
-if (class_exists('CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff', true) === false) {
-    $error = 'Class CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff not found';
-    throw new PHP_CodeSniffer_Exception($error);
-}
 
 /**
  * CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff.
@@ -42,7 +44,7 @@ if (class_exists('CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff', true) =
  * @license   http://thomas.ernest.fr/developement/php_cs/licence GNU General Public License
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends CodeIgniter_Sniffs_Files_AbstractClosingCommentSniff
+class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends AbstractClosingCommentSniff
 {
     public $applicationRoot = '/application/';
 
@@ -63,13 +65,13 @@ class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends CodeIgniter_S
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
+     * @param File $phpcsFile The current file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
      *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function process(File $phpcsFile, $stackPtr)
     {
         // We are only interested if this is the first open tag.
         if ($stackPtr !== 0) {
@@ -85,7 +87,7 @@ class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends CodeIgniter_S
         // add an error, if application root doesn't exist in current file path
         if (false === $locationPath) {
             $error = 'Unable to find "' . $this->_getAppRoot() . '" in file path "' . $filePath . '". Please set your project\'s application root.';
-            $phpcsFile->addError($error, count($tokens) - 1);
+            $phpcsFile->addError($error, count($tokens) - 1, 'ClosingLocationCommentSniffError');
             return;
         }
         // generates the expected comment
@@ -116,7 +118,7 @@ class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends CodeIgniter_S
 
         if ( ! $hasClosingLocationComment) {
             $error = 'No comment block marks the end of file instead of the closing PHP tag. Please add a comment block containing only "' . $commentTemplate . '".';
-            $phpcsFile->addError($error, $currentToken);
+            $phpcsFile->addError($error, $currentToken, 'ClosingLocationCommentSniff');
         }
     }//end process()
 
@@ -170,7 +172,7 @@ class CodeIgniter_Sniffs_Files_ClosingLocationCommentSniff extends CodeIgniter_S
      */
     private function _getAppRoot()
     {
-        $appRoot = PHP_CodeSniffer::getConfigData('ci_application_root');
+        $appRoot = Config::getConfigData('ci_application_root');
         if (null === $appRoot) {
             $appRoot = $this->applicationRoot;
         }
