@@ -1,5 +1,6 @@
 {
     "name": "nerones/codeigniter-phpcs",
+    "type": "phpcodesniffer-standard",
     "description": "Rules for codeigniter",
     "license": "MIT",
     "authors": [
